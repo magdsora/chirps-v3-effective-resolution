@@ -1,0 +1,21 @@
+# Deny-by-default: this repo publishes the diagnostic code only.
+# Manuscripts, literature PDFs, and multi-GB raster caches must never be
+# committed, so nothing is tracked unless it is explicitly re-included below.
+*
+
+!.gitignore
+!README.md
+!LICENSE
+!requirements.txt
+
+!fig3_effective_resolution.py
+!r2_diagnostic.py
+!make_submission_figs.py
+
+# Rendered figures that the manuscript uses (small, worth shipping).
+!figures/
+figures/*
+!figures/submission/
+figures/submission/*
+!figures/submission/*.png
+!figures/submission/r2_timeseries.csv
