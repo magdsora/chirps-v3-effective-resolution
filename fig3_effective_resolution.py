@@ -15,8 +15,8 @@ Sparse green = pixels actually anchored to ground truth.
 coarser grid for different views.
 
 Inputs: CHC monthly station-density GeoTIFFs.
-    v3: https://data.chc.ucsb.edu/products/CHIRPS/v3.0/diagnostics/station_density/
-    v2: https://data.chc.ucsb.edu/products/CHIRPS-2.0/diagnostics/station_density/
+    v3: https://data.chc.ucsb.edu/products/CHIRPS/v3.0/diagnostics/global_monthly_station_density/tifs/p05/
+    v2: https://data.chc.ucsb.edu/products/CHIRPS-2.0/diagnostics/global_monthly_station_density/tifs/p05/
 
 To apply this elsewhere, edit the CONFIG block below — AOI, study period,
 grid size, and CHIRPS version are all knobs.

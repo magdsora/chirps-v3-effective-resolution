@@ -34,7 +34,7 @@ Both are configurable at the top of each script via the `Config` dataclass.
 No raster data is committed. Both diagnostics are public:
 
 - Station density (monthly GeoTIFFs, gauge count per 0.05° pixel):
-  <https://data.chc.ucsb.edu/products/CHIRPS/v3.0/diagnostics/station_density/>
+  <https://data.chc.ucsb.edu/products/CHIRPS/v3.0/diagnostics/global_monthly_station_density/tifs/p05/>
 - Station-blending R² (monthly GeoTIFFs):
   <https://data.chc.ucsb.edu/products/CHIRPS/v3.0/diagnostics/monthly.Rsquared.estimate/tifs/>
 
@@ -46,7 +46,7 @@ run. The station-density tiles are expected to be present locally in
 mkdir -p figures/station_density_tifs
 wget -r -np -nd -A 'v3.stn_density.*.tif' \
   -P figures/station_density_tifs \
-  https://data.chc.ucsb.edu/products/CHIRPS/v3.0/diagnostics/station_density/
+  https://data.chc.ucsb.edu/products/CHIRPS/v3.0/diagnostics/global_monthly_station_density/tifs/p05/
 ```
 
 The full archive is roughly 540 monthly files from January 1981 onward. Recent
