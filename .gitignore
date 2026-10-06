@@ -6,6 +6,7 @@
 !.gitignore
 !README.md
 !LICENSE
+!.zenodo.json
 !requirements.txt
 
 !fig3_effective_resolution.py

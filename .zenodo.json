@@ -1,0 +1,20 @@
+{
+  "upload_type": "software",
+  "title": "Effective resolution of CHIRPS v3.0 in West Africa: diagnostic code",
+  "description": "Code accompanying the manuscript “What Does ‘5.5 km Daily’ Actually Mean? Resolution Claims of CHIRPS v3.0 in West Africa.” It computes the CHIRPS v3.0 station-density and station-blending R² diagnostics for West Africa and produces Figures 1 and 2.",
+  "creators": [
+    {
+      "name": "Sora, Magd",
+      "affiliation": "Vanke School of Public Health, Tsinghua University",
+      "orcid": "0009-0004-4030-2836"
+    }
+  ],
+  "license": "mit",
+  "keywords": [
+    "CHIRPS",
+    "precipitation",
+    "rain gauges",
+    "West Africa",
+    "effective resolution"
+  ]
+}
