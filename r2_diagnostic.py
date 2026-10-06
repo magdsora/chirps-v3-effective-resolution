@@ -173,7 +173,7 @@ def plot_timeseries(ax, df: pd.DataFrame, cfg: Config,
         ax.plot(sub["year"], sub["median"], **s)
     ax.axhline(cfg.floor_exact, color="#777", linestyle=":", linewidth=1.0)
     ax.text(cfg.years[0] + 0.5, cfg.floor_exact - 0.012,
-            "satellite-only floor (0.25)",
+            "satellite-only value (0.25)",
             fontsize=12, color="#555", va="top")
     ax.set_xlim(cfg.years[0] - 1, cfg.years[-1] + 1)
     ax.set_ylim(0, 1)
