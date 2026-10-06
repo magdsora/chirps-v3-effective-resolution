@@ -93,7 +93,9 @@ def read_region_values(path: Path, region: Region) -> np.ndarray:
         nodata = ds.nodata
         if nodata is not None:
             arr = arr[arr != nodata]
-        arr = arr[(arr >= 0) & (arr <= 1)]
+        # The R² files carry no nodata tag and store ocean as 0, a value Eq. 10
+        # cannot produce (its minimum is ~0.207), so 0 is treated as no data.
+        arr = arr[(arr > 0) & (arr <= 1)]
     return arr
 
 
@@ -106,7 +108,7 @@ def read_region_array(path: Path, region: Region) -> tuple[np.ndarray, rasterio.
         transform = ds.window_transform(win)
         if nodata is not None:
             arr[arr == nodata] = np.nan
-        arr[(arr < 0) | (arr > 1)] = np.nan
+        arr[(arr <= 0) | (arr > 1)] = np.nan  # 0 = ocean, see read_region_values
     return arr, transform
 
 
