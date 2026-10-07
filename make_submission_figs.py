@@ -1,7 +1,8 @@
 """
 Render submission-ready versions of Figure 1 and Figure 2:
-  - colorblind-safe palettes (orange = un-anchored, purple = station-anchored;
-    no red-green), consistent across both figures
+  - one colorblind-safe sequential blue scale shared by both figures
+    (light = little or no gauge support, dark = strong gauge support),
+    orange/blue time-series lines, and a neutral grey ocean
   - 300 dpi
   - no embedded suptitles (the manuscript captions carry that text)
 
@@ -14,8 +15,12 @@ from pathlib import Path
 
 import matplotlib
 matplotlib.use("Agg")
+import matplotlib.colors as mcolors
 import matplotlib.figure
 import matplotlib.pyplot as plt
+import cartopy.crs as ccrs
+import cartopy.feature as cfeature
+import cartopy.mpl.geoaxes as geoaxes
 
 OUT_DIR = Path("figures/submission")
 OUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -30,17 +35,31 @@ def _savefig_300(self, *args, **kwargs):
 matplotlib.figure.Figure.savefig = _savefig_300
 matplotlib.figure.Figure.suptitle = lambda self, *a, **k: None
 
+# ---- shared colours ---------------------------------------------------------
+# One sequential blue ramp (light -> dark) for both figures' maps. Under a
+# Machado et al. (2009) protan/deutan simulation, 0% vs 100% coverage and
+# R² 0.25 vs 0.85 stay well separated, unlike the red-yellow-green originals.
+BLUE = ["#e4effc", "#b7d3f6", "#86b6ef", "#5598e7",
+        "#2a78d6", "#1c5cab", "#104281", "#0d366b"]
+OCEAN = "#e6e6e3"  # neutral grey, so the sea is not read as a light blue value
+
+_orig_add_feature = geoaxes.GeoAxes.add_feature
+
+def _add_feature(self, feature, **kwargs):
+    if feature is cfeature.OCEAN:
+        kwargs["facecolor"] = OCEAN
+    return _orig_add_feature(self, feature, **kwargs)
+
+geoaxes.GeoAxes.add_feature = _add_feature
+
 # ---------------------------------------------------------------- Figure 1 --
 import fig3_effective_resolution as f3
 
-# pastel orange -> off-white -> pastel purple (CVD-safe; distinct from ocean blue)
-f3.CUSTOM_CMAPS["light_orpu"] = [
-    (0.0, "#F2B279"), (0.5, "#F7F3EA"), (1.0, "#BFA0DC"),
-]
+f3.CUSTOM_CMAPS["blue_seq"] = [(i / (len(BLUE) - 1), c) for i, c in enumerate(BLUE)]
 
 fig1_cfg = replace(
     f3.CONFIG,
-    bg_cmap_name="light_orpu",
+    bg_cmap_name="blue_seq",
     out_path=OUT_DIR / "Fig1_station_coverage.png",
 )
 print("== Figure 1 ==")
@@ -49,16 +68,36 @@ f3.main(fig1_cfg)
 # ---------------------------------------------------------------- Figure 2 --
 import r2_diagnostic as r2
 
-# reference line: green -> purple (ties to purple = well-anchored in the maps)
-r2.STYLE["NW US"]["color"] = "#5B4B8A"
+# time-series lines: orange vs blue stay distinct for red-green colour-blind readers
+r2.STYLE["West Africa"]["color"] = "#eb6834"
+r2.STYLE["NW US"]["color"] = "#2a78d6"
 
-# spatial maps: RdYlGn -> PuOr (orange = satellite-only floor,
-# purple = station-anchored; matches Figure 1's semantics).
-# Patch get_cmap only for this run.
-_orig_get_cmap = plt.get_cmap
-plt.get_cmap = lambda name=None, *a, **k: _orig_get_cmap(
-    "PuOr" if name == "RdYlGn" else name, *a, **k
-)
+BLUE_CMAP = mcolors.LinearSegmentedColormap.from_list("blue_seq", BLUE, N=256)
+
+
+def plot_spatial(ax, grid, transform, region, panel_label, subtitle, title_pad=6):
+    """r2.plot_spatial with the blue ramp on a 0.20-0.85 scale (the published
+    R² range), so 0.25 (satellite-only) sits at the light end."""
+    h, w = grid.shape
+    left, top = transform.c, transform.f
+    extent = (left, left + transform.a * w, top + transform.e * h, top)
+    im = ax.imshow(grid, extent=extent, origin="upper", cmap=BLUE_CMAP,
+                   norm=mcolors.Normalize(vmin=0.2, vmax=0.85),
+                   transform=ccrs.PlateCarree(), interpolation="none", zorder=1)
+    ax.add_feature(cfeature.OCEAN, facecolor=OCEAN, edgecolor="none", zorder=2)
+    ax.add_feature(cfeature.BORDERS, linewidth=0.5, edgecolor="#333333", zorder=4)
+    ax.add_feature(cfeature.COASTLINE, linewidth=0.6, edgecolor="#333333", zorder=4)
+    ax.set_extent([region.west, region.east, region.south, region.north],
+                  crs=ccrs.PlateCarree())
+    gl = ax.gridlines(draw_labels=True, linewidth=0.3, color="#777777", alpha=0.4)
+    gl.top_labels = gl.right_labels = False
+    gl.xlabel_style = {"size": 7}
+    gl.ylabel_style = {"size": 7}
+    ax.set_title(f"{panel_label}. {subtitle}", fontsize=11, pad=title_pad)
+    return im
+
+
+r2.plot_spatial = plot_spatial
 
 fig2_cfg = replace(
     r2.CONFIG,
@@ -70,5 +109,4 @@ fig2_cfg = replace(
 print("== Figure 2 ==")
 r2.main(fig2_cfg)
 
-plt.get_cmap = _orig_get_cmap
 print("done ->", OUT_DIR)
